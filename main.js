@@ -45,3 +45,12 @@ fetch("https://tarmeezacademy.com/api/v1/posts")
  
  
 })
+
+
+
+
+
+function register(){
+  
+  
+}

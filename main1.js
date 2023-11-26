@@ -1,24 +1,31 @@
-let post = document.querySelector('#posts')
-axios.get('https://tarmeezacademy.com/api/v1/posts')
+function relod(page=1){
+  let post = document.querySelector('#posts')
+axios.get(`https://tarmeezacademy.com/api/v1/posts?page=${page}`)
 .then((response)=>{
-  
   console.log(response)
-  
-
   
   for ( i in response.data.data) {
     let tg =''
    if(response.data.data[i].tags.length != 0) {
      for(tag in response.data.data[i].tags){
        tg += ` <button type="button" class="btn btn-secondary ms-3" >${response.data.data[i].tags[tag]}</button>`
+       
      }
    }
-  post.innerHTML += ` <div class="d-flex justify-content-center">
+   image = 'UserProfile.png'
+   let tt =typeof response.data.data[i].author.profile_image 
+   if ( tt == 'string' &&  response.data.data[i].author.profile_image != '') {
+     image = response.data.data[i].author.profile_image
+    } 
+   
+  post.innerHTML += ` 
+  <a class='aaa'>
+  <div class="d-flex justify-content-center com" data-id= "${response.data.data[i].id}" onclick='com(${response.data.data[i].id})'>
                       <div class="col-9">
                         
-                        <div class="card shadow my-5">
+                        <div class="card shadow my-5 postid">
                             <div class="card-header">
-                                <img src="${response.data.data[i].author.profile_image}" alt="" style="width: 40px; height: 40px;" class="border border-2 rounded-circle">
+                                <img src="${image}" alt="" style="width: 40px; height: 40px;" class="border border-2 rounded-circle">
                                 <b>@${response.data.data[i].author.name}</b>
                             </div>
                             <div class="card-body">
@@ -41,22 +48,23 @@ axios.get('https://tarmeezacademy.com/api/v1/posts')
                         </div>
                       </div>
                     </div>
+                    </a>
                     `
   
   // console.log(response.data.data)
  }
-   console.log(response)
-})
-
-
+   
+   
+ })
+}    
+ relod(1)
 
 
 
 function login() {
   const username = document.querySelector('#username').value
   const password = document.querySelector('#password').value
-  console.log(username)
-  console.log(password)
+
   const bady = {
     "username" : username,
     "password" : password
@@ -64,21 +72,88 @@ function login() {
   url = 'https://tarmeezacademy.com/api/v1/login'
   axios.post(url,bady)
   .then( (response)=>{
-    localStorage.setItem("tokin",response.data.tokin)
+    localStorage.setItem("token",response.data.token)
     localStorage.setItem("user",JSON.stringify(response.data.user))
     
+    
+    let modal = document.querySelector('#exampleModal')
+    let modalintialse = bootstrap.Modal.getInstance(modal)
+    modalintialse.hide()
+    
+   alertgh('login terméner','success')
+   setTimeout( () => {
+     const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+   alertr.close()
+   },2000)
+   
+   loginset()
+    
   })
-  let modal = document.querySelector('#exampleModal')
-  let modaintialse = Botstrap.modal.getInstance(modal)
-  modaintialse.hide()
+  
   
 }
 
+function register(){
+  const username = document.querySelector('#register-username').value
+  const password = document.querySelector('#register-password').value
+  const name = document.querySelector('#register-name').value
+  const profil = document.querySelector('#register-profil').files[0]
+  
+  let formData = new FormData()
+  formData.append('username',username)
+  formData.append('password',password)
+  formData.append('name',name)
+  formData.append('image',profil)
+  
+  
+  url = 'https://tarmeezacademy.com/api/v1/register'
+  axios.post(url,formData,{
+    "headers":{
+      "content-Type":"multipart/form-data"
+    }
+  })
+  .then( (response)=>{
+    localStorage.setItem("token",response.data.token)
+    localStorage.setItem("user",JSON.stringify(response.data.user))
+    
+    let tt = typeof response.data.user.profile_image
+    if ( tt == 'string' &&  response.data.user.profile_image != '') {
+    localStorage.setItem('UserProfile',response.data.user.profile_image)
+    }else{
+     localStorage.setItem('UserProfile', "UserProfile.png")
+    }
+    
+    
+    
+    console.log(response)
+    let modal = document.querySelector('#register-model')
+    let modalintialse = bootstrap.Modal.getInstance(modal)
+    modalintialse.hide()
+    
+    alertgh('register a New user is terminer','success')
+    loginset()
+    
+    setTimeout( () => {
+     const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+   alertr.close()
+   },2000)
+  }).catch( (errer)=>{
+    console.log(errer.response.data.message)
+    alertgh(errer.response.data.message,'danger')
+    setTimeout( () => {
+     const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+   alertr.close()
+   },2000)
+   
+   loginset()
+  })
+  
+
+}
 
 
-
-
-
+function alertgh(alertext,typet){
+document.querySelector('#jj').innerHTML= `<div id="alert-saccus" clastyle="z-index: 999"></div>`
 const alertPlaceholder = document.getElementById('alert-saccus')
 const appendAlert = (message, type) => {
   const wrapper = document.createElement('div')
@@ -94,6 +169,137 @@ const appendAlert = (message, type) => {
 
 const alertTrigger = document.getElementById('login-alert')
 
-  alertTrigger.addEventListener('click', () => {
-    appendAlert('Nice, you triggered this alert message!', 'success')
-  })
+    appendAlert(alertext, typet)
+}
+
+function loginset(){
+  const divlogin = document.querySelector('.divlogin')
+  divlogin.innerHTML = `
+    <button type="button" class="btn btn-outline-success me-3" data-bs-toggle="modal" data-bs-target="#exampleModal" >login</button>
+    <button type="button" class="btn btn-outline-success me-3" data-bs-toggle="modal" data-bs-target="#register-model">registre</button>
+  `
+   
+   
+  if (localStorage.token != '') {
+    divlogin.innerHTML= `
+     <div class="Profil">
+        <img src="${localStorage.getItem('UserProfile')}" alt="" style='border-radius: 50%;'>
+     </div>
+    <h3 style='margin-right: auto;'id='ii' >${JSON.parse(localStorage.getItem('user')).name}</h3>
+    <button type="button" class="btn btn-outline-danger me-3 déconnecté" onclick= 'déconnecté()'>déconnecté</button>
+    
+    `
+    document.querySelector('.div-post').innerHTML = `<div class="plus bg-primary" data-bs-toggle="modal" data-bs-target="#add-post-model"><i class="fa-solid fa-plus"></i></div>`
+  } else {
+    divlogin.innerHTML = `
+    <button type="button" class="btn btn-outline-success me-3" data-bs-toggle="modal" data-bs-target="#exampleModal" >login</button>
+    <button type="button" class="btn btn-outline-success me-3" data-bs-toggle="modal" data-bs-target="#register-model">registre</button>
+  `
+  document.querySelector('.div-post').innerHTML = ' '
+  }
+}  
+
+loginset()
+
+function  déconnecté(){
+  localStorage.token=''
+  document.querySelector('#jj').innerHTML= `<div id="alert-saccus" clastyle="z-index: 999"></div>
+  `
+  alertgh('deconecter','success')
+ 
+  setTimeout(() => {
+    const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+    alertr.close()
+  }, 2000)
+  
+  
+  loginset()
+} 
+
+
+
+function createPoste() {
+  
+  const title = document.querySelector('#title-post').value;
+  const body = document.querySelector('#body-post').value;
+  const imagePost = document.querySelector('#image-post').files[0]
+  console.log(imagePost)
+
+  let formData = new FormData()
+  formData.append("title",title)
+  formData.append("body",body)
+  formData.append("image",imagePost)
+  const token = localStorage.getItem('token')
+  
+  let header = {
+    'content-type' : "multipart/form-data",
+    "authorization": `Bearer ${token}`
+  };
+
+  const url = 'https://tarmeezacademy.com/api/v1/posts';
+
+  axios.post(url, formData, { "headers": header })
+    .then((response) => {
+      console.log(response)
+      let modal = document.querySelector('#add-post-model')
+      let modalintialse = bootstrap.Modal.getInstance(modal)
+      modalintialse.hide()
+      
+      alertgh('create post success', 'success')
+      setTimeout(() => {
+        const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+        alertr.close()
+      }, 2000)
+      
+      loginset()
+      
+      relod()
+    })
+    .catch((errer) => {
+      
+      alertgh(errer.response.data.message, 'danger')
+      setTimeout(() => {
+        const alertr = bootstrap.Alert.getOrCreateInstance('#alert-saccus')
+        alertr.close()
+      }, 2000)
+      
+      loginset()
+     });
+}
+
+
+ let n =1;
+window.onscroll = function () {
+  
+  let height = document.documentElement.scrollHeight - document.documentElement.clientHeight
+  let scrollTop =document.documentElement.scrollTop
+  
+   let end = `${scrollTop / height}`
+   
+
+     if (n<16) {
+     if( end >= 0.80 && end <= 0.81099){
+       n++
+       relod(n)
+   } } 
+   
+    
+  
+};
+
+
+
+function com(id) {
+  
+axios.get(`https://tarmeezacademy.com/api/v1/posts/${id}`)
+.then((response)=>{
+  console.log('yyyyyuu')
+  localStorage.setItem('comment',JSON.stringify(response.data.data))
+window.location.href='comment.html'
+
+ 
+})
+
+
+
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link rel="stylesheet" href="all.min.css">
+  <link rel="stylesheet" href="bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="comment.css">
+</head>
+
+<body>
+ <div class="header-comment ">
+   <a href="" class="retourner"><i class="fa-solid fa-arrow-left icon">gh</i></a>
+   
+   <h3>publications de <span class="name">ghassen</span></h3>
+   <i class="fa-solid fa-magnifying-glass icon"></i>
+ </div>
+ <hr>
+ <div class="profile-comment">
+   <div class="div">
+     <img src="UserProfile" alt="" class="UserProfile">
+   </div>
+  <p class="name">ghassen</p>
+ </div>
+ 
+ 
+<div class="comment">
+  
+</div>
+ <!-- start comment  -->
+ <div class="testt">
+   
+ </div>
+
+ 
+ <!-- end comment -->
+ 
+ <div class="input">
+   <input type="text" id="input">
+   
+ </div>
+ <div class="envoie" onclick="createCommentpost()">
+   sende
+ </div>
+ 
+ 
+  <script src="axios.min.js"></script>
+  <script src="all.min.js"></script>
+  <script src="bootstrap.min.js"></script>
+  <script src="main1.js" ></script>
+</body>
+<script>
+  
+  
+  let commentPost = document.querySelector('.comment')
+  let userProfile = document.querySelector('.UserProfile')
+  let name = document.getElementsByClassName('name')
+  let testt = document.querySelector('.testt')
+  let comment = JSON.parse(localStorage.getItem('comment'))
+     console.log(comment)
+  function commentt(){
+    
+    name[1].innerHTML = comment.author.name
+    name[0].innerHTML = comment.author.name
+    userProfile.src= comment.author.profile_image
+    commentPost.innerHTML = `
+      <div class="card shadow my-5 postid">
+       
+        <div class="card-body">
+          <img class="w-100" src="${comment.image}" alt="">
+          <h6 class="mt-1 ps-2 " style=" color:#9da0a1;"> ${comment.created_at}</h6>
+          <h5> ${comment.title}</h5>
+          <p>
+            ${comment.body}
+          </p>
+          <hr>
+          <div>
+            <i class="fa-solid fa-pen "></i>
+            <span>
+              (${comment.comments_count}) comment
+            </span>
+            <button type="button" class="btn btn-secondary ms-3">Secondary</button>
+            <button type="button" class="btn btn-secondary ms-3">Secondary</button><button type="button" class="btn btn-secondary ms-3">Secondary</button>
+          </div>
+        </div>
+      </div>
+     `
+     
+     for( i in comment.comments){
+       console.log(comment.comments[i])
+       testt.innerHTML += `
+       
+           <div class="test">
+              <div class="div">
+                <img src="  ${comment.comments[i].author.profile_image}" alt="">
+              </div>
+              <div class="testContent">
+                <h3>
+                    ${comment.comments[i].author.name}
+                </h3>
+                <p>
+                  ${comment.comments[i].body}
+                </p>
+              </div>
+  
+           </div>
+       
+       `
+       
+     }
+    
+  } 
+  commentt() 
+  
+ let a= document.querySelector('.retourner')
+ a.oncluck = function (){
+   a.href='index.html'
+  // window.location.href= 'index.html'
+ }
+ 
+ 
+ function createCommentpost(){
+   
+  let inputComment = document.getElementById('input').value 
+  let token = localStorage.getItem('token')
+  let id = JSON.parse(localStorage.getItem('comment')).id
+  
+  let body= {
+    body:inputComment
+  }
+  let headers ={
+     "authorization": `Bearer ${token}`
+  }
+  axios.post(`https://tarmeezacademy.com/api/v1/posts/${id}/comments`,body,{
+    headers:headers
+  })
+  .then( (response)=>{
+    console.log(response)
+    commentt() 
+  })
+ }
+  </script>
+</html>
